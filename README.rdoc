@@ -1,7 +1,9 @@
 = convert.rake
 
+Updated to work with Ruby on Rails 3.1.0-rc4.
+
 Rake task to convert and transfer a Rails database from one database
-platform to another using two open db adapters.  For example, 
+platform to another using two open db adapters.  For example,
 from Postgres to MySQL, or the reverse.
 
 The task deletes all data in the development database and then
@@ -13,7 +15,7 @@ database.
 * Works with blobs
 
 == Assumptions
-* No writes are happening to either database for the duration of this task. 
+* No writes are happening to either database for the duration of this task.
 * Both schemas are identical (i.e. migrations are at the same VERSION)
 * The development data can be removed and replaced.
 

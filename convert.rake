@@ -6,18 +6,18 @@
 #            production data
 #
 # WARNING 2: This script assumes it is the only user updating either database.
-#            Database integrity could be corrupted if other users where 
+#            Database integrity could be corrupted if other users where
 #            writing to the databases.
 #
 # Usage:  rake db:convert:prod2dev
 #
-# It assumes the development database has a schema identical to the production 
+# It assumes the development database has a schema identical to the production
 # database, but will delete any data before importing the production data
 #
-# A couple of the outer loops evolved from 
+# A couple of the outer loops evolved from
 #    http://snippets.dzone.com/posts/show/3393
 #
-# For further instructions see 
+# For further instructions see
 #    http://myutil.com/2008/8/31/rake-task-transfer-rails-database-mysql-to-postgres
 #
 # The master repository for this script is at github:
@@ -30,11 +30,11 @@
 # This rake task is released under this BSD license:
 #
 # Copyright (c) 2008, Matson Systems, Inc. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above copyright
@@ -57,13 +57,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# PAGE_SIZE is the number of rows updated in a single transaction.
-# This facilitates tables where the number of rows exceeds the systems
-# memory
-PAGE_SIZE=10000
-
 namespace :db do
-  namespace :convert do    
+  namespace :convert do
     desc 'Convert/import production data to development.   DANGER Deletes all data in the development database.   Assumes both schemas are already migrated.'
     task :prod2dev => :environment do
 
@@ -87,26 +82,19 @@ namespace :db do
         DevelopmentModelClass.record_timestamps = false
 
         # Page through the data in case the table is too large to fit in RAM
-        offset = count = 0;
-        print "Converting #{table_name}..."; STDOUT.flush
+        print "Converting #{table_name}... "; STDOUT.flush
         # First, delete any old dev data
         DevelopmentModelClass.delete_all
-        while ((models = ProductionModelClass.find(:all, 
-            :offset=>offset, :limit=>PAGE_SIZE)).size > 0)
-
-          count += models.size
-          offset += PAGE_SIZE
+        ProductionModelClass.find_each do |model|
 
           # Now, write out the prod data to the dev db
           DevelopmentModelClass.transaction do
-            models.each do |model|
-              new_model = DevelopmentModelClass.new(model.attributes)
-              new_model.id = model.id
-              new_model.save(false)
-            end
+            new_model = DevelopmentModelClass.new(model.attributes)
+            new_model.id = model.id
+            new_model.save(:validate => false)
           end
         end
-        print "#{count} records converted\n"
+        print "done\n"
       end
     end
   end
