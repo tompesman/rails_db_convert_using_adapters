@@ -94,7 +94,7 @@ namespace :db do
             new_model.save(:validate => false)
           end
         end
-        print "done\n"
+        print ": #{DevelopmentModelClass.all.count} of #{ProductionModelClass.all.count} records\n"
       end
     end
   end
